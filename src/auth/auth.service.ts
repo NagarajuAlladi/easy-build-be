@@ -12,6 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Model } from 'mongoose';
 import { AuthCredentials } from './dto/auth-credential.dto';
 import { JwtPayload } from './interface/jwt-payload.interface';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +21,7 @@ export class AuthService {
     private authModel: Model<User>,
     private userRepository: UserRepository,
     private jwtService: JwtService,
+    private mailService: MailService,
   ) {}
 
   async signUp(authCredintials: CreateAuthDto): Promise<User> {
@@ -34,6 +36,18 @@ export class AuthService {
         const user = new this.authModel(authCredintials);
         user.password = await bcrypt.hash(user.password, 10);
         await user.save();
+        const payload: JwtPayload = {
+          name: user.name,
+          username: user.username,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+          password: user.password,
+          isAdmin: user.isAdmin,
+        };
+
+        const token = this.jwtService.sign(payload);
+
+        await this.mailService.sendUserConformation(user, token);
         return user;
       } else {
         throw new ConflictException('user already exist');
