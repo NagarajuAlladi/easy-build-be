@@ -10,20 +10,22 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   imports: [
     MailerModule.forRootAsync({
       // imports: [ConfigModule], // import module if not enabled globally
-      useFactory: async (config: ConfigService) => ({
+      useFactory: (config: ConfigService) => ({
         // transport: config.get("MAIL_TRANSPORT"),
         // or
         transport: {
-          host: config.get('MAIL_HOST'),
+          // host: process.env.EMAIL_HOST,
+          // port: parseInt(process.env.EMAIL_PORT),
+          host: 'smtp.gmail.com',
           port: 465,
           secure: true,
           auth: {
-            user: config.get('MAIL_USER'),
-            pass: config.get('MAIL_PASSWORD'),
+            user: 'nagarajualladi999@gmail.com',
+            pass: 'mecvwwetowscjmhn',
           },
         },
         defaults: {
-          from: `"No Reply" <${config.get('MAIL_FROM')}>`,
+          from: `"No Reply" ,<'nagarajualladi999@gmail.com'>`,
         },
         template: {
           dir: join(__dirname, 'templates'),
@@ -33,7 +35,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           },
         },
       }),
-      inject: [ConfigService],
+      // inject: [ConfigService],
     }),
   ],
   providers: [MailService],
